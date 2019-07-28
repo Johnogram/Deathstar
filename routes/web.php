@@ -12,5 +12,10 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('intro');
 });
+
+Route::get('/navigate', [
+    'as' => 'navigate',
+    'uses' => 'NavController@start',
+]);
