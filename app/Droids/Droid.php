@@ -4,49 +4,107 @@ declare(strict_types=1);
 
 namespace App\Droids;
 
-use App\Traits\ParseReponse;
+use App\Boards\BoardLayout;
+use App\Traits\MakeRequest;
 use GuzzleHttp\Client;
 
 class Droid
 {
 
-    use ParseReponse;
-    
+    use MakeRequest;
+
     private $_client;
 
-    private $_nickname;
+    private $_path;
+    private $_layout;
 
+    private $_x;
+    private $_y;
+    
     private $_forward;
     private $_left;
     private $_right;
 
-    public function __construct()
+    public function __construct(BoardLayout $layout)
     {
         $this->_client = new Client([
             'http_errors' => false,
         ]);
 
-        $this->_nickname = "JohnOGram";
-        $this->_forward = 'f';
-        $this->_left = 'l';
-        $this->_right = 'r';
+        $this->_path = "";
+        $this->_layout = $layout;
+
+        // Log route to return at end?
+
+        $this->_x = 4;
+        $this->_y = 0;
+
+        $this->_forward = "f";
+        $this->_left = "l";
+        $this->_right = "r";
     }
 
-    public function startFlight(string $flight_path) : array
+    // This probably needs to be refactored to be used throughout
+    public function letsFly() : string
     {
-        $res = $this->_client->request('GET', 'http://deathstar.victoriaplum.com/alliance.php', [
-            'query' => [
-                'name' => $this->_nickname,
-                'path' => $flight_path,
-            ],
-        ]);
+        $this->moveForward();
 
-        $res_body = $this->parseResponse($res->getBody()->getContents());
+        return $this->_path;
+    }
 
-        return [
-            'status' => $res->getStatusCode(),
-            'map' => $res_body->map,
-        ];
+    // Try using X and Y
+
+    private function moveForward()
+    {
+        $this->_path = $this->_path . $this->_forward;
+        $this->_y ++;
+
+        $flight = $this->makeRequest($this->_path);
+
+        $this->navigate($flight);
+    }
+
+    private function recalculateCourse()
+    {
+
+    }
+
+    private function courseComplete()
+    {
+        return redirect()->route('complete');
+    }
+
+    private function navigate(array $flight)
+    {
+        // Sanity check crash position
+
+        switch ($flight['status']) {
+        case 410:
+            $this->moveForward();
+            break;
+
+        case 417:
+            if (!$this->checkCrashPosition($flight['message'])) {
+                print_r("Crash wrong");
+            }
+            print_r($flight);exit;
+            break;
+
+        case 200:
+            $this->courseComplete();
+            break;
+
+        default:
+            $this->moveForward();
+            break;
+        }
+    }
+
+    private function checkCrashPosition(string $message)
+    {
+        $logged_position = (string) $this->_y . "," . $this->_x . ".";
+        
+        return (substr($message, 20) === $logged_position);
     }
 
 }

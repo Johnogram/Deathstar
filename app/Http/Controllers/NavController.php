@@ -12,12 +12,10 @@ class NavController extends Controller
     
     public function start()
     {
-        $droid = new Droid();
         $layout = new BoardLayout();
+        $droid = new Droid($layout);
 
-        $initial_path = "ffffffffff";
-
-        $journey = $droid->startFlight($initial_path);
+        $journey = $droid->letsFly();
 
         print_r($journey);
 
