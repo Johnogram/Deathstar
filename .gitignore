@@ -10,5 +10,3 @@ npm-debug.log
 yarn-error.log
 .editorconfig
 /.vscode
-app.css
-app.js
