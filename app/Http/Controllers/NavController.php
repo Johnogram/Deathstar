@@ -17,7 +17,7 @@ class NavController extends Controller
 
         return view('complete', [
             'path' => $path,
-            'layout' => $layout,
+            'layout' => array_reverse($layout),
         ]); 
     }
 

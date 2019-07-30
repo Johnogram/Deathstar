@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Droids;
 
-use App\Boards\BoardLayout;
 use App\Traits\{MakeRequest, FlightControl};
 use GuzzleHttp\Client;
 
@@ -96,6 +95,12 @@ class Droid
     private function courseComplete($flight)
     {
         $this->_layout = $flight['map'];
+
+        // As I'm batching forward movements into 512 groups, we
+        // most likely overshot the desination by a few hundred
+        // But we can calculate an accurate path from the length of the map returned
+        $steps_forward = (int) count($flight['map']) - $this->_y;
+        $this->_path = $this->_path . str_repeat($this->_forward, $steps_forward);
     }
 
     private function navigate(array $flight)

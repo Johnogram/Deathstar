@@ -1,8 +1,117 @@
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+@font-face {
+    font-family: "StarJedi";
+    src: url("../fonts/starjedi.ttf");
+}
 
-// Variables
-@import 'variables';
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    color: #FFF;
+    background: #000;
+}
 
-// Bootstrap
-@import '~bootstrap/scss/bootstrap';
+h1, h2, h3, h4, h5, h6 {
+    font-family: "StarJedi", sans-serif;
+    letter-spacing: 2px;
+    text-transform: lowercase;
+}
+
+.splashContainer {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    display: flex;
+}
+
+.startLink {
+    display: block;
+    flex: 0 0 50%;
+    height: 100vh;
+    width: 50%;
+
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+
+    &.hanSolo {
+        background-image: url("../images/hansolo.jpg")
+    }
+
+    &.greedo {
+        background-image: url("../images/greedo.jpg")
+    }
+}
+
+.title {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #FFF;
+    padding: 10px 50px;
+    border-radius: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+
+    height: 100vh;
+
+    .path {
+        grid-area: 1 / 1 / 2 / 2;
+        max-width: 50vw;
+    }
+    .map {
+        grid-area: 1 / 2 / 2 / 3;
+        max-width: 50vw;
+    }
+}
+
+.path {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .pathString {
+        max-width: 80%;
+        background: #FFF;
+        color: #111;
+        border-radius: 8px;
+        padding: 10px;
+        word-wrap: break-word;
+        letter-spacing: 2px;
+    }
+}
+
+.stats {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+
+    > div {
+        text-align: center;
+    }
+
+    span {
+        font-size: 60px;
+    }
+}
+
+.map {
+    overflow-y: scroll;
+    font-family: monospace;
+    margin: 20px 0;
+
+    .mapRow {
+        white-space: pre;
+        font-size: 32px;
+        text-align: center;
+    }
+}

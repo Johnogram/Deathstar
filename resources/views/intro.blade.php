@@ -2,10 +2,13 @@
 
 @section('content')
 
-    <h3>Intro</h3>
+    <div class="splashContainer">
+        <a href="{{ route('navigate', ["Han"]) }}" class="startLink hanSolo"></a>
+        <a href="{{ route('navigate', ["Greedo"]) }}" class="startLink greedo"></a>
 
-    <!-- Who shot first -->
-
-    <a href="{{ route('navigate') }}">Start</a>
+        <div class="title">
+            <h1>Who shot first?</h1>
+        </div>
+    </div>
 
 @endsection
