@@ -19,7 +19,3 @@ Route::get('/navigate', [
     'as' => 'navigate',
     'uses' => 'NavController@start',
 ]);
-
-Route::get('/complete', function () {
-    return view('complete');
-});

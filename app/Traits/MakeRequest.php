@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace App\Traits;
 
-
-use App\Traits\ParseReponse;
-
 trait MakeRequest
 {
 
-    use ParseReponse;
-
-    public function makeRequest(string $flight_path)
+    protected function makeRequest(string $flight_path) : array
     {
         $res = $this->_client->request('GET', 'http://deathstar.victoriaplum.com/alliance.php', [
             'query' => [
@@ -20,12 +15,14 @@ trait MakeRequest
                 'path' => $flight_path,
             ],
         ]);
-        $res_body = $this->parseResponse($res->getBody()->getContents());
+
+        $res_body = json_decode($res->getBody()->getContents(), true);
+        $map = explode("\n", $res_body['map']);
 
         return [
             'status' => $res->getStatusCode(),
-            'message' => $res_body->message,
-            'map' => $res_body->map,
+            'message' => $res_body['message'],
+            'map' => array_reverse($map),
         ];
     }
 }
