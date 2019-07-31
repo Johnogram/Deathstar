@@ -11,6 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get(
+    '/',
+    function () {
+        return view('intro');
+    }
+);
+
+Route::get('/navigate', [
+    'as' => 'navigate',
+    'uses' => 'NavController@start',
+]);
