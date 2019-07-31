@@ -7,9 +7,16 @@ namespace App\Traits;
 trait MakeRequest
 {
 
+    /**
+     * Make a request to the API
+     *
+     * @param string $flight_path The flight path we want to fly
+     *
+     * @return array The response code, message and map provided from the API
+     */
     protected function makeRequest(string $flight_path) : array
     {
-        $res = $this->_client->request('GET', 'http://deathstar.victoriaplum.com/alliance.php', [
+        $res = $this->client->request('GET', 'http://deathstar.victoriaplum.com/alliance.php', [
             'query' => [
                 'name' => "JohnOGram",
                 'path' => $flight_path,

@@ -11,9 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return view('intro');
-});
+Route::get(
+    '/',
+    function () {
+        return view('intro');
+    }
+);
 
 Route::get('/navigate', [
     'as' => 'navigate',

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Droids;
 
-use App\Traits\{MakeRequest, FlightControl};
+use App\Traits\MakeRequest;
+use App\Traits\FlightControl;
 use GuzzleHttp\Client;
 
 class Droid
@@ -12,116 +13,158 @@ class Droid
 
     use MakeRequest, FlightControl;
 
-    private $_client;
+    private $client;
 
-    private $_path;
-    private $_layout;
+    private $path;
+    private $layout;
 
-    private $_x;
-    private $_y;
+    private $x;
+    private $y;
     
-    private $_forward;
-    private $_left;
-    private $_right;
+    private $forward;
+    private $left;
+    private $right;
 
     public function __construct()
     {
-        $this->_client = new Client([
+        $this->client = new Client([
             'http_errors' => false,
         ]);
 
-        $this->_path = "";
-        $this->_layout = [];
+        $this->path = "";
+        $this->layout = [];
 
-        $this->_x = 4;
-        $this->_y = 0;
+        $this->x = 4;
+        $this->y = 0;
 
-        $this->_forward = "f";
-        $this->_left = "l";
-        $this->_right = "r";
+        $this->forward = "f";
+        $this->left = "l";
+        $this->right = "r";
     }
 
-    public function letsFly()
+    /**
+     * Begin our flight and return the path when finished
+     *
+     * @return array The path and layout of our flight
+     */
+    public function letsFly() : array
     {
         $this->moveForward();
 
         return [
-            $this->_path,
-            $this->_layout,
+            $this->path,
+            $this->layout,
         ];
     }
 
-    private function moveForward()
+    /**
+     * Move forward until we crash or reach our destination
+     *
+     * @return void
+     */
+    private function moveForward() : void
     {
         // Moving forward one square at a time causes too much recursion
         // 512 characters is not an unreasonable payload to deliver to an API
-        $path = $this->_path . str_repeat($this->_forward, 512);
+        $path = $this->path . str_repeat($this->forward, 512);
 
         $flight = $this->makeRequest($path);
 
         $this->navigate($flight);
     }
 
-    private function analyseCrash($flight)
+    /**
+     * Get the information from our crash to use in re-plotting our route
+     * and update our current information
+     *
+     * @param array $flight The API response
+     *
+     * @return void
+     */
+    private function analyseCrash(array $flight) : void
     {
-        $previous_y = $this->_y;
+        $previousy = $this->y;
 
-        $this->_x = $this->getCrashX($flight['message']);
-        $this->_y = $this->getCrashY($flight['message']); 
+        $this->x = $this->getCrashX($flight['message']);
+        $this->y = $this->getCrashY($flight['message']);
 
-        $steps_forward = $this->_y - $previous_y;
+        $stepsforward = $this->y - $previousy;
 
-        $this->_path = $this->updatePath($this->_path, $steps_forward, $this->_forward);
+        $this->path = $this->updatePath($this->path, $stepsforward, $this->forward);
 
         $this->recalculateCourse($flight);
     }
 
-    private function recalculateCourse($flight)
+    /**
+     * Reculate our route based on the response from the API, getting the nearest gap
+     * and the change required to reach it
+     *
+     * @param array $flight The API response
+     *
+     * @return void
+     */
+    private function recalculateCourse(array $flight) : void
     {
         [$lateral_steps, $lateral_direction, $nearest_gap] = $this->traverseObstacle(
             $flight['map'],
-            $this->_x,
-            $this->_left,
-            $this->_right
+            $this->x,
+            $this->left,
+            $this->right
         );
 
-        $this->_x = $nearest_gap;
+        $this->x = $nearest_gap;
 
-        $this->_path = $this->updatePath($this->_path, $lateral_steps, $lateral_direction);
+        $this->path = $this->updatePath($this->path, $lateral_steps, $lateral_direction);
 
         $this->moveForward();
     }
 
-    private function courseComplete($flight)
+    /**
+     * Once we have completed our course, log the map of the path taken
+     * and clean up our path, co-ordinates, etc...
+     *
+     * @param array $flight The API response
+     *
+     * @return void
+     */
+    private function courseComplete(array $flight) : void
     {
-        $this->_layout = $flight['map'];
+        $this->layout = $flight['map'];
 
         // As I'm batching forward movements into 512 groups, we
         // most likely overshot the desination by a few hundred
         // But we can calculate an accurate path from the length of the map returned
-        $steps_forward = (int) count($flight['map']) - $this->_y;
-        $this->_path = $this->_path . str_repeat($this->_forward, $steps_forward);
+        $stepsforward = (int) count($flight['map']) - $this->y;
+        $this->path = $this->path . str_repeat($this->forward, $stepsforward);
     }
 
-    private function navigate(array $flight)
+    /**
+     * Choose the course of action based on the API response
+     *
+     * @param array $flight The API response
+     *
+     * @return void
+     *
+     * @throws Exception Throw an exception if we get an un-accounted for response from the API
+     */
+    private function navigate(array $flight) : void
     {
         switch ($flight['status']) {
-        case 410:
-            $this->moveForward();
-            break;
+            case 410:
+                $this->moveForward();
+                break;
 
-        case 417:
-            $this->analyseCrash($flight);
-            break;
+            case 417:
+                $this->analyseCrash($flight);
+                break;
 
-        case 200:
-            $this->courseComplete($flight);
-            break;
+            case 200:
+                $this->courseComplete($flight);
+                break;
 
-        default:
-            throw new \Exception("Something went wrong, API response unexpected");
-            break;
+            default:
+                throw new \Exception("Something went wrong, API response unexpected");
+                break;
         }
     }
-
 }
