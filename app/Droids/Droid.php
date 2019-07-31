@@ -27,6 +27,8 @@ class Droid
 
     public function __construct()
     {
+        // Disable http_errors
+        // Guzzle will throw an exeption if the response isn't 2XX otherwise
         $this->client = new Client([
             'http_errors' => false,
         ]);
@@ -131,7 +133,7 @@ class Droid
     {
         $this->layout = $flight['map'];
 
-        // As I'm batching forward movements into 512 groups, we
+        // As I'm batching forward movements 512 at a time, we
         // most likely overshot the desination by a few hundred
         // But we can calculate an accurate path from the length of the map returned
         $stepsforward = (int) count($flight['map']) - $this->y;
